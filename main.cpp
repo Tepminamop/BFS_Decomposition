@@ -62,15 +62,6 @@ void make_adjacent_list(const vector<vector<int>>& incidence_list, vector<vector
 	}
 }
 
-void dfs(vector<bool>& used, vector<vector<int>>& graph, int v) {
-	used[v] = true;
-	for (int i = 0; i < (int)graph[v].size(); i++) {
-		if (used[graph[v][i]] == false) {
-			dfs(used, graph, graph[v][i]);
-		}
-	}
-}
-
 void bfs(vector<int>& parent, vector<int>& destination, const vector<vector<int>>& graph, vector<bool>& used, const int& n, const int& start, int& maximum, const int& start_destination) {
 	queue<int> q;
 	destination[start] = start_destination;
@@ -104,12 +95,16 @@ void split_parts_into_id_subsets(const vector<int>& parts_of_type_set, const vec
 	for (int i = 0; i < (int)parts_of_type_set.size(); i++) {
 		if (parts_to_subset.find(parts_of_type_set[i] + 1) != parts_to_subset.end()) {
 			//if parts are connected, put them in the same subset
+			//this should never be entered
+			assert(false);
 			count_type_subset[parts_to_subset[parts_of_type_set[i] + 1]] += count[parts_of_type_set[i]];
 			parts_to_subset[parts_of_type_set[i]] = parts_to_subset[parts_of_type_set[i] + 1];
 			continue;
 		}
 		else if (parts_to_subset.find(parts_of_type_set[i] - 1) != parts_to_subset.end()) {
 			//if parts are connected, put them in the same subset
+			//this should never be entered
+			assert(false);
 			count_type_subset[parts_to_subset[parts_of_type_set[i] - 1]] += count[parts_of_type_set[i]];
 			parts_to_subset[parts_of_type_set[i]] = parts_to_subset[parts_of_type_set[i] - 1];
 			continue;
@@ -151,7 +146,10 @@ void input_graph_from_file(vector<vector<int>>& input_data,
 		}
 		in.close();
 	}
-	else(cout << "Error with file!");
+	else {
+		cout << "Error with file!";
+		assert(false);
+	}
 }
 
 int main() {
@@ -213,6 +211,7 @@ int main() {
 	int cnt0 = 0, cnt1 = 0;
 	vector<int> parts_of_type_set_0, parts_of_type_set_1;
 	for (int i = 0; i <= maximum; i++) {
+		//maybe make another partitioning
 		if (i % 2 == 0) {
 			cnt0 += count[i];
 			parts_of_type_set_0.push_back(i);
@@ -225,16 +224,19 @@ int main() {
 	//count in zero set and in first set
 	cout << cnt0 << " " << cnt1 << '\n';
 
-	//split parts in id_sets in each type set
+	//count vertices in each subset in type_set
 	vector<int> count_type_subset_0(4, 0);
 	vector<int> count_type_subset_1(4, 0);
 
+	//need to know in which type_set every part is located
 	map<int, int> parts_to_subset_0;
 	map<int, int> parts_to_subset_1;
 
+	//split parts in id_sets in each type set
 	split_parts_into_id_subsets(parts_of_type_set_0, count, count_type_subset_0, parts_to_subset_0);
 	split_parts_into_id_subsets(parts_of_type_set_1, count, count_type_subset_1, parts_to_subset_1);
 
+	//output subsets of each type_set
 	cout << "subsets of set 0: ";
 	for (int i = 0; i < 4; i++) {
 		cout << count_type_subset_0[i] << " ";
@@ -247,12 +249,12 @@ int main() {
 	}
 	cout << '\n';
 
-	//TYPE_ID_SET.first = 0 or 1 (time period (set))
-	//TYPE_ID_SET.second -> NO of subset (CORES subsets in each time period)
+	//TYPE_ID_SET.first = 0 or 1 (time period (set), type_set)
+	//TYPE_ID_SET.second -> NO of subset (CORES subsets in each time period(type_set))
 	vector<pair<int, int>> TYPE_ID_SET(COUNT_VERTICES, { -1, -1 });
 	for (int i = 0; i < COUNT_VERTICES; i++) {
-		int time_period;
-		int subset;
+		int time_period;//type_set
+		int subset;//id_subset
 		int part = destination[i];
 		if (parts_to_subset_0.find(part) != parts_to_subset_0.end()) {
 			time_period = 0;
@@ -263,8 +265,8 @@ int main() {
 			subset = parts_to_subset_1[part];
 		}
 
-		TYPE_ID_SET[i].first = time_period;
-		TYPE_ID_SET[i].second = subset;
+		TYPE_ID_SET[i].first = time_period;//type_set
+		TYPE_ID_SET[i].second = subset;//id_subset
 	}
 
 	assert(cnt0 + cnt1 == COUNT_VERTICES);
