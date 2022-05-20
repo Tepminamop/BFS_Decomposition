@@ -8,6 +8,7 @@
 #include <sstream>
 #include <fstream>
 #include <string>
+#include <cassert>
 
 using std::clock;
 using std::vector;
@@ -165,7 +166,7 @@ int main() {
 	string filename;
 	cout << "Input filename: " << '\n';
 	//cin >> filename;
-	filename = "kuk_top.nls";
+	filename = "TRINITY_1.nls";
 	input_graph_from_file(input_data, COUNT_VERTICES, input_count_edges, filename);
 	const int COUNT_EDGES = input_count_edges + 1;
 
@@ -265,6 +266,10 @@ int main() {
 		TYPE_ID_SET[i].first = time_period;
 		TYPE_ID_SET[i].second = subset;
 	}
+
+	assert(cnt0 + cnt1 == COUNT_VERTICES);
+	assert(count_type_subset_0[0] + count_type_subset_0[1] + count_type_subset_0[2] + count_type_subset_0[3] == cnt0);
+	assert(count_type_subset_1[0] + count_type_subset_1[1] + count_type_subset_1[2] + count_type_subset_1[3] == cnt1);
 
 	//print_answer(TYPE_ID_SET, COUNT_VERTICES);
 
