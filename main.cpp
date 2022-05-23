@@ -23,6 +23,7 @@ using std::min_element;
 using std::max_element;
 using std::string;
 using std::stringstream;
+using std::pair;
 #define CORES 4
 
 //1) transform input data into adjacent list (input_data -> incidence_list -> adjacent_list)
@@ -91,22 +92,22 @@ void print_answer(const vector<pair<int, int>>& TYPE_ID_SET, const int& n) {
 	}
 }
 
-void split_parts_into_id_subsets(const vector<int>& parts_of_type_set, const vector<int>& count, vector<int>& count_type_subset, map<int, int>& parts_to_subset) {
+void split_parts_into_id_subsets(const vector<pair<int, int>>& parts_of_type_set, const vector<int>& count, vector<int>& count_type_subset, map<int, int>& parts_to_subset) {
 	for (int i = 0; i < (int)parts_of_type_set.size(); i++) {
-		if (parts_to_subset.find(parts_of_type_set[i] + 1) != parts_to_subset.end()) {
+		if (parts_to_subset.find(parts_of_type_set[i].first + 1) != parts_to_subset.end()) {
 			//if parts are connected, put them in the same subset
 			//this should never be entered
 			assert(false);
-			count_type_subset[parts_to_subset[parts_of_type_set[i] + 1]] += count[parts_of_type_set[i]];
-			parts_to_subset[parts_of_type_set[i]] = parts_to_subset[parts_of_type_set[i] + 1];
+			count_type_subset[parts_to_subset[parts_of_type_set[i].first + 1]] += count[parts_of_type_set[i].first];
+			parts_to_subset[parts_of_type_set[i].first] = parts_to_subset[parts_of_type_set[i].first + 1];
 			continue;
 		}
-		else if (parts_to_subset.find(parts_of_type_set[i] - 1) != parts_to_subset.end()) {
+		else if (parts_to_subset.find(parts_of_type_set[i].first - 1) != parts_to_subset.end()) {
 			//if parts are connected, put them in the same subset
 			//this should never be entered
 			assert(false);
-			count_type_subset[parts_to_subset[parts_of_type_set[i] - 1]] += count[parts_of_type_set[i]];
-			parts_to_subset[parts_of_type_set[i]] = parts_to_subset[parts_of_type_set[i] - 1];
+			count_type_subset[parts_to_subset[parts_of_type_set[i].first - 1]] += count[parts_of_type_set[i].first];
+			parts_to_subset[parts_of_type_set[i].first] = parts_to_subset[parts_of_type_set[i].first - 1];
 			continue;
 		}
 
@@ -117,8 +118,8 @@ void split_parts_into_id_subsets(const vector<int>& parts_of_type_set, const vec
 			}
 		}
 
-		count_type_subset[minimum_subset] += count[parts_of_type_set[i]];
-		parts_to_subset[parts_of_type_set[i]] = minimum_subset;
+		count_type_subset[minimum_subset] += count[parts_of_type_set[i].first];
+		parts_to_subset[parts_of_type_set[i].first] = minimum_subset;
 	}
 }
 
@@ -209,20 +210,39 @@ int main() {
 
 	//allocate parts in type sets (zero set or one set)
 	int cnt0 = 0, cnt1 = 0;
-	vector<int> parts_of_type_set_0, parts_of_type_set_1;
+	vector<pair<int, int>> parts_of_type_set_0, parts_of_type_set_1;
 	for (int i = 0; i <= maximum; i++) {
 		//maybe make another partitioning
 		if (i % 2 == 0) {
 			cnt0 += count[i];
-			parts_of_type_set_0.push_back(i);
+			parts_of_type_set_0.push_back({ i, count[i] });
 		}
 		else {
 			cnt1 += count[i];
-			parts_of_type_set_1.push_back(i);
+			parts_of_type_set_1.push_back({ i, count[i] });
 		}
 	}
+
 	//count in zero set and in first set
 	cout << cnt0 << " " << cnt1 << '\n';
+
+	sort(parts_of_type_set_0.begin(), parts_of_type_set_0.end(), [](pair<int, int> a, pair<int, int> b) {
+		return a.second > b.second;
+		});
+
+	sort(parts_of_type_set_1.begin(), parts_of_type_set_1.end(), [](pair<int, int> a, pair<int, int> b) {
+		return a.second > b.second;
+		});
+
+	for (int i = 0; i < (int)parts_of_type_set_0.size(); i++) {
+		cout << parts_of_type_set_0[i].second << " ";
+	}
+	cout << '\n';
+
+	for (int i = 0; i < (int)parts_of_type_set_1.size(); i++) {
+		cout << parts_of_type_set_1[i].second << " ";
+	}
+	cout << '\n';
 
 	//count vertices in each subset in type_set
 	vector<int> count_type_subset_0(4, 0);
