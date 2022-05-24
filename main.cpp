@@ -24,6 +24,8 @@ using std::max_element;
 using std::string;
 using std::stringstream;
 using std::pair;
+using std::fstream;
+using std::ios;
 #define CORES 4
 
 //1) transform input data into adjacent list (input_data -> incidence_list -> adjacent_list)
@@ -92,6 +94,15 @@ void print_answer(const vector<pair<int, int>>& TYPE_ID_SET, const int& n) {
 	}
 }
 
+void print_answer_to_file(const vector<pair<int, int>>& TYPE_ID_SET, const int& n) {
+	fstream answer_output_file;
+	answer_output_file.open("decomposition.txt", ios::out);
+	for (int i = 0; i < n; i++) {
+		answer_output_file << i << " " << TYPE_ID_SET[i].first << " " << TYPE_ID_SET[i].second << '\n';
+	}
+
+}
+
 void split_parts_into_id_subsets(const vector<pair<int, int>>& parts_of_type_set, const vector<int>& count, vector<int>& count_type_subset, map<int, int>& parts_to_subset) {
 	for (int i = 0; i < (int)parts_of_type_set.size(); i++) {
 		if (parts_to_subset.find(parts_of_type_set[i].first + 1) != parts_to_subset.end()) {
@@ -127,7 +138,7 @@ void input_graph_from_file(vector<vector<int>>& input_data,
 	const int& count_vertices,
 	int& input_count_edges, const string& filename) {
 	string str;
-	std::fstream in;
+	fstream in;
 	in.open(filename);
 	if (in) {
 		while (!in.eof()) {
@@ -161,15 +172,12 @@ int main() {
 	const int COUNT_VERTICES = input_count_vertices;
 	vector<vector<int>> input_data(COUNT_VERTICES);
 	int input_count_edges = -1;
-	//input(input_data, COUNT_VERTICES, input_count_edges);
 	string filename;
 	cout << "Input filename: " << '\n';
-	//cin >> filename;
-	filename = "TRINITY_1.nls";
+	cin >> filename;
+	//filename = "TRINITY_1.nls";
 	input_graph_from_file(input_data, COUNT_VERTICES, input_count_edges, filename);
 	const int COUNT_EDGES = input_count_edges + 1;
-
-	const clock_t adjacent_list_time = clock();
 
 	vector<vector<int>> incidence_list(COUNT_EDGES);
 	make_incidence_list(incidence_list, input_data);
@@ -177,123 +185,94 @@ int main() {
 	vector<vector<int>> adjacent_list(COUNT_VERTICES);
 	make_adjacent_list(incidence_list, adjacent_list);
 
-	cout << "Time to make adjacent list: " << float(clock() - adjacent_list_time) / CLOCKS_PER_SEC << '\n';
-
 	srand(time(NULL));
 	int start_pos = rand() % COUNT_VERTICES;
 
 	//use bfs to make graph partition
-	const clock_t bfs_time = clock();
-	vector<bool> used(COUNT_VERTICES, false);
-	int maximum = 0;
-	vector<int> destination(COUNT_VERTICES, -1);
-	vector<int> parent(COUNT_VERTICES, -1);
-	bfs(parent, destination, adjacent_list, used, COUNT_VERTICES, start_pos, maximum, maximum);
-	for (int i = 0; i < COUNT_VERTICES; i++) {
-		if (used[i] == false) {
-			bfs(parent, destination, adjacent_list, used, COUNT_VERTICES, i, maximum, maximum + 2);
-		}
-	}
-	cout << "Parts: " << maximum << '\n';
-	cout << "Time to make bfs: " << float(clock() - bfs_time) / CLOCKS_PER_SEC << '\n';
-
-	//count vertices in each part
-	vector<int> count(maximum + 1, 0);
-	for (int i = 0; i < COUNT_VERTICES; i++) {
-		count[destination[i]]++;
-	}
-
-	for (int i = 0; i < count.size(); i++) {
-		cout << count[i] << " ";
-	}
-	cout << '\n';
-
-	//allocate parts in type sets (zero set or one set)
-	int cnt0 = 0, cnt1 = 0;
-	vector<pair<int, int>> parts_of_type_set_0, parts_of_type_set_1;
-	for (int i = 0; i <= maximum; i++) {
-		//maybe make another partitioning
-		if (i % 2 == 0) {
-			cnt0 += count[i];
-			parts_of_type_set_0.push_back({ i, count[i] });
-		}
-		else {
-			cnt1 += count[i];
-			parts_of_type_set_1.push_back({ i, count[i] });
-		}
-	}
-
-	//count in zero set and in first set
-	cout << cnt0 << " " << cnt1 << '\n';
-
-	sort(parts_of_type_set_0.begin(), parts_of_type_set_0.end(), [](pair<int, int> a, pair<int, int> b) {
-		return a.second > b.second;
-		});
-
-	sort(parts_of_type_set_1.begin(), parts_of_type_set_1.end(), [](pair<int, int> a, pair<int, int> b) {
-		return a.second > b.second;
-		});
-
-	for (int i = 0; i < (int)parts_of_type_set_0.size(); i++) {
-		cout << parts_of_type_set_0[i].second << " ";
-	}
-	cout << '\n';
-
-	for (int i = 0; i < (int)parts_of_type_set_1.size(); i++) {
-		cout << parts_of_type_set_1[i].second << " ";
-	}
-	cout << '\n';
-
-	//count vertices in each subset in type_set
-	vector<int> count_type_subset_0(4, 0);
-	vector<int> count_type_subset_1(4, 0);
-
-	//need to know in which type_set every part is located
-	map<int, int> parts_to_subset_0;
-	map<int, int> parts_to_subset_1;
-
-	//split parts in id_sets in each type set
-	split_parts_into_id_subsets(parts_of_type_set_0, count, count_type_subset_0, parts_to_subset_0);
-	split_parts_into_id_subsets(parts_of_type_set_1, count, count_type_subset_1, parts_to_subset_1);
-
-	//output subsets of each type_set
-	cout << "subsets of set 0: ";
-	for (int i = 0; i < 4; i++) {
-		cout << count_type_subset_0[i] << " ";
-	}
-	cout << '\n';
-
-	cout << "subsets of set 1: ";
-	for (int i = 0; i < 4; i++) {
-		cout << count_type_subset_1[i] << " ";
-	}
-	cout << '\n';
-
-	//TYPE_ID_SET.first = 0 or 1 (time period (set), type_set)
-	//TYPE_ID_SET.second -> NO of subset (CORES subsets in each time period(type_set))
-	vector<pair<int, int>> TYPE_ID_SET(COUNT_VERTICES, { -1, -1 });
-	for (int i = 0; i < COUNT_VERTICES; i++) {
-		int time_period;//type_set
-		int subset;//id_subset
-		int part = destination[i];
-		if (parts_to_subset_0.find(part) != parts_to_subset_0.end()) {
-			time_period = 0;
-			subset = parts_to_subset_0[part];
-		}
-		else {
-			time_period = 1;
-			subset = parts_to_subset_1[part];
+	int best = INT_MIN;
+	for (int i = 0; i < 100; i++) {
+		vector<bool> used(COUNT_VERTICES, false);
+		int maximum = 0;
+		vector<int> destination(COUNT_VERTICES, -1);
+		vector<int> parent(COUNT_VERTICES, -1);
+		bfs(parent, destination, adjacent_list, used, COUNT_VERTICES, start_pos, maximum, maximum);
+		for (int i = 0; i < COUNT_VERTICES; i++) {
+			if (used[i] == false) {
+				bfs(parent, destination, adjacent_list, used, COUNT_VERTICES, i, maximum, maximum + 2);
+			}
 		}
 
-		TYPE_ID_SET[i].first = time_period;//type_set
-		TYPE_ID_SET[i].second = subset;//id_subset
+		//count vertices in each part
+		vector<int> count(maximum + 1, 0);
+		for (int i = 0; i < COUNT_VERTICES; i++) {
+			count[destination[i]]++;
+		}
+
+		//allocate parts in type sets (zero set or one set)
+		int cnt0 = 0, cnt1 = 0;
+		vector<pair<int, int>> parts_of_type_set_0, parts_of_type_set_1;
+		for (int i = 0; i <= maximum; i++) {
+			//maybe make another partitioning
+			if (i % 2 == 0) {
+				cnt0 += count[i];
+				parts_of_type_set_0.push_back({ i, count[i] });
+			}
+			else {
+				cnt1 += count[i];
+				parts_of_type_set_1.push_back({ i, count[i] });
+			}
+		}
+
+		sort(parts_of_type_set_0.begin(), parts_of_type_set_0.end(), [](pair<int, int> a, pair<int, int> b) {
+			return a.second > b.second;
+			});
+
+		sort(parts_of_type_set_1.begin(), parts_of_type_set_1.end(), [](pair<int, int> a, pair<int, int> b) {
+			return a.second > b.second;
+			});
+
+		//count vertices in each subset in type_set
+		vector<int> count_type_subset_0(4, 0);
+		vector<int> count_type_subset_1(4, 0);
+
+		//need to know in which type_set every part is located
+		map<int, int> parts_to_subset_0;
+		map<int, int> parts_to_subset_1;
+
+		//split parts in id_sets in each type set
+		split_parts_into_id_subsets(parts_of_type_set_0, count, count_type_subset_0, parts_to_subset_0);
+		split_parts_into_id_subsets(parts_of_type_set_1, count, count_type_subset_1, parts_to_subset_1);;
+
+		//TYPE_ID_SET.first = 0 or 1 (time period (set), type_set)
+		//TYPE_ID_SET.second -> NO of subset (CORES subsets in each time period(type_set))
+		vector<pair<int, int>> TYPE_ID_SET(COUNT_VERTICES, { -1, -1 });
+		for (int i = 0; i < COUNT_VERTICES; i++) {
+			int time_period;//type_set
+			int subset;//id_subset
+			int part = destination[i];
+			if (parts_to_subset_0.find(part) != parts_to_subset_0.end()) {
+				time_period = 0;
+				subset = parts_to_subset_0[part];
+			}
+			else {
+				time_period = 1;
+				subset = parts_to_subset_1[part];
+			}
+
+			TYPE_ID_SET[i].first = time_period;//type_set
+			TYPE_ID_SET[i].second = subset;//id_subset
+		}
+
+		assert(cnt0 + cnt1 == COUNT_VERTICES);
+		assert(count_type_subset_0[0] + count_type_subset_0[1] + count_type_subset_0[2] + count_type_subset_0[3] == cnt0);
+		assert(count_type_subset_1[0] + count_type_subset_1[1] + count_type_subset_1[2] + count_type_subset_1[3] == cnt1);
+
+		if ((count_type_subset_0[3] + count_type_subset_1[3]) / 2 > best) {
+			best = (count_type_subset_0[3] + count_type_subset_1[3]) / 2;
+			print_answer_to_file(TYPE_ID_SET, COUNT_VERTICES);
+		}
+
 	}
-
-	assert(cnt0 + cnt1 == COUNT_VERTICES);
-	assert(count_type_subset_0[0] + count_type_subset_0[1] + count_type_subset_0[2] + count_type_subset_0[3] == cnt0);
-	assert(count_type_subset_1[0] + count_type_subset_1[1] + count_type_subset_1[2] + count_type_subset_1[3] == cnt1);
-
-	//print_answer(TYPE_ID_SET, COUNT_VERTICES);
 
 	return 0;
 }
