@@ -23,6 +23,8 @@ using std::min_element;
 using std::max_element;
 using std::string;
 using std::stringstream;
+using std::fstream;
+using std::ios;
 #define CORES 4
 
 //1) transform input data into adjacent list (input_data -> incidence_list -> adjacent_list)
@@ -91,6 +93,15 @@ void print_answer(const vector<pair<int, int>>& TYPE_ID_SET, const int& n) {
 	}
 }
 
+void print_answer_to_file(const vector<pair<int, int>>& TYPE_ID_SET, const int& n) {
+	fstream answer_output_file;
+	answer_output_file.open("decomposition.txt", ios::out);
+	for (int i = 0; i < n; i++) {
+		answer_output_file <<i  <<TYPE_ID_SET[i].first << " " << TYPE_ID_SET[i].second << '\n';
+	}
+
+}
+
 void split_parts_into_id_subsets(const vector<int>& parts_of_type_set, const vector<int>& count, vector<int>& count_type_subset, map<int, int>& parts_to_subset) {
 	for (int i = 0; i < (int)parts_of_type_set.size(); i++) {
 		if (parts_to_subset.find(parts_of_type_set[i] + 1) != parts_to_subset.end()) {
@@ -126,7 +137,7 @@ void input_graph_from_file(vector<vector<int>>& input_data,
 	const int& count_vertices,
 	int& input_count_edges, const string& filename) {
 	string str;
-	std::fstream in;
+	fstream in;
 	in.open(filename);
 	if (in) {
 		while (!in.eof()) {
