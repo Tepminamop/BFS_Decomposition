@@ -25,10 +25,6 @@ using std::string;
 using std::stringstream;
 #define CORES 4
 
-//1) transform input data into adjacent list (input_data -> incidence_list -> adjacent_list)
-//2) use graph partitioning algorithm (fiduccia or bfs (bfs is much more simplier but maybe its wrong))
-//3) thats all???
-
 void input(vector<vector<int>>& input_data, const int& count_vertices, int& input_count_edges) {
 	for (int i = 0; i < count_vertices; i++) {
 		int vertice;
