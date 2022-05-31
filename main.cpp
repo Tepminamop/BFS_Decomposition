@@ -161,6 +161,9 @@ void input_graph_from_file(vector<vector<int>>& input_data,
 }
 
 int main() {
+	string filename;
+	cout << "Input filename: " << '\n';
+	cin >> filename;
 	cout << "Input number of vertices: " << '\n';
 	int input_count_vertices;
 	cin >> input_count_vertices;
@@ -168,10 +171,6 @@ int main() {
 	const int COUNT_VERTICES = input_count_vertices;
 	vector<vector<int>> input_data(COUNT_VERTICES);
 	int input_count_edges = -1;
-	string filename;
-	cout << "Input filename: " << '\n';
-	cin >> filename;
-	//filename = "TRINITY_1.nls";
 	input_graph_from_file(input_data, COUNT_VERTICES, input_count_edges, filename);
 	const int COUNT_EDGES = input_count_edges + 1;
 
@@ -267,7 +266,6 @@ int main() {
 			best = (count_type_subset_0[3] + count_type_subset_1[3]) / 2;
 			print_answer_to_file(TYPE_ID_SET, COUNT_VERTICES);
 		}
-
 	}
 
 	return 0;
