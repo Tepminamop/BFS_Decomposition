@@ -180,12 +180,11 @@ int main() {
 	vector<vector<int>> adjacent_list(COUNT_VERTICES);
 	make_adjacent_list(incidence_list, adjacent_list);
 
-	srand(time(NULL));
-	int start_pos = rand() % COUNT_VERTICES;
-
 	//use bfs to make graph partition
 	int best = INT_MIN;
 	for (int i = 0; i < 100; i++) {
+		srand(time(NULL));
+		int start_pos = rand() % COUNT_VERTICES;
 		vector<bool> used(COUNT_VERTICES, false);
 		int maximum = 0;
 		vector<int> destination(COUNT_VERTICES, -1);
