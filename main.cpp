@@ -166,15 +166,6 @@ void input_graph_from_file(vector<vector<int>>& input_data, const int& count_ver
 	}
 }
 
-<<<<<<< Updated upstream
-int main() {
-	string filename;
-	cout << "Input filename: " << '\n';
-	cin >> filename;
-	cout << "Input number of vertices: " << '\n';
-	int input_count_vertices;
-	cin >> input_count_vertices;
-=======
 void get_vertices_count(int& count_vertices, const string& filename) {
 	string str;
 	fstream in;
@@ -198,12 +189,9 @@ void get_vertices_count(int& count_vertices, const string& filename) {
 		assert(false);
 	}
 }
->>>>>>> Stashed changes
 
 int main() {
 	int input_count_edges = -1;
-<<<<<<< Updated upstream
-=======
 	int input_count_vertices = 0;
 
 	string filename;
@@ -214,7 +202,6 @@ int main() {
 	const int COUNT_VERTICES = input_count_vertices + 1;
 
 	vector<vector<int>> input_data(COUNT_VERTICES);
->>>>>>> Stashed changes
 	input_graph_from_file(input_data, COUNT_VERTICES, input_count_edges, filename);
 
 	const int COUNT_EDGES = input_count_edges + 1;
@@ -225,15 +212,12 @@ int main() {
 	vector<vector<int>> adjacent_list(COUNT_VERTICES, vector<int>());
 	make_adjacent_list(incidence_list, adjacent_list);
 
+	srand(time(NULL));
+	int start_pos = rand() % COUNT_VERTICES;
+
 	//use bfs to make graph partition
 	int best = INT_MIN;
-<<<<<<< Updated upstream
-	for (int i = 0; i < 100; i++) {
-		srand(time(NULL));
-		int start_pos = rand() % COUNT_VERTICES;
-=======
 	for (int i = 0; i < 10; i++) {
->>>>>>> Stashed changes
 		vector<bool> used(COUNT_VERTICES, false);
 		int maximum = 0;
 		vector<int> destination(COUNT_VERTICES, -1);
@@ -316,6 +300,7 @@ int main() {
 			best = (count_type_subset_0[3] + count_type_subset_1[3]) / 2;
 			print_answer_to_file(TYPE_ID_SET, COUNT_VERTICES, adjacent_list);
 		}
+
 	}
 
 	return 0;
