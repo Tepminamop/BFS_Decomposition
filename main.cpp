@@ -62,6 +62,13 @@ void make_adjacent_list(const vector<vector<int>>& incidence_list, vector<vector
 }
 
 void bfs(vector<int>& parent, vector<int>& destination, const vector<vector<int>>& graph, vector<bool>& used, const int& n, const int& start, int& maximum, const int& start_destination) {
+	if (graph[start].size() == 0) {
+		destination[start] = -1;
+		parent[start] = -1;
+		used[start] = true;
+		return;
+	}
+
 	queue<int> q;
 	destination[start] = start_destination;
 	maximum = max(maximum, start_destination);
@@ -90,11 +97,12 @@ void print_answer(const vector<pair<int, int>>& TYPE_ID_SET, const int& n) {
 	}
 }
 
-void print_answer_to_file(const vector<pair<int, int>>& TYPE_ID_SET, const int& n) {
+void print_answer_to_file(const vector<pair<int, int>>& TYPE_ID_SET, const int& n, vector<vector<int>>& adjacent_list) {
 	fstream answer_output_file;
 	answer_output_file.open("decomposition.txt", ios::out);
 	for (int i = 0; i < n; i++) {
-		answer_output_file << i << " " << TYPE_ID_SET[i].first << " " << TYPE_ID_SET[i].second << '\n';
+		if (adjacent_list[i].size() != 0)
+			answer_output_file << i << " " << TYPE_ID_SET[i].first << " " << TYPE_ID_SET[i].second << '\n';
 	}
 
 }
@@ -130,9 +138,7 @@ void split_parts_into_id_subsets(const vector<pair<int, int>>& parts_of_type_set
 	}
 }
 
-void input_graph_from_file(vector<vector<int>>& input_data,
-	const int& count_vertices,
-	int& input_count_edges, const string& filename) {
+void input_graph_from_file(vector<vector<int>>& input_data, const int& count_vertices, int& input_count_edges, const string& filename) {
 	string str;
 	fstream in;
 	in.open(filename);
@@ -160,6 +166,7 @@ void input_graph_from_file(vector<vector<int>>& input_data,
 	}
 }
 
+<<<<<<< Updated upstream
 int main() {
 	string filename;
 	cout << "Input filename: " << '\n';
@@ -167,24 +174,66 @@ int main() {
 	cout << "Input number of vertices: " << '\n';
 	int input_count_vertices;
 	cin >> input_count_vertices;
+=======
+void get_vertices_count(int& count_vertices, const string& filename) {
+	string str;
+	fstream in;
+	in.open(filename);
+	if (in) {
+		while (!in.eof()) {
+			while (getline(in, str, '\n') && !in.eof()) {
+				vector<int> result;
+				stringstream ss(str);
+				string item;
+				while (getline(ss, item, ' ')) {
+					result.push_back(stoi(item));
+				}
+				count_vertices = max(count_vertices, result[0]);
+			}
+		}
+		in.close();
+	}
+	else {
+		cout << "Error with file!";
+		assert(false);
+	}
+}
+>>>>>>> Stashed changes
 
-	const int COUNT_VERTICES = input_count_vertices;
-	vector<vector<int>> input_data(COUNT_VERTICES);
+int main() {
 	int input_count_edges = -1;
+<<<<<<< Updated upstream
+=======
+	int input_count_vertices = 0;
+
+	string filename;
+	cout << "Input filename: " << '\n';
+	cin >> filename;
+
+	get_vertices_count(input_count_vertices, filename);
+	const int COUNT_VERTICES = input_count_vertices + 1;
+
+	vector<vector<int>> input_data(COUNT_VERTICES);
+>>>>>>> Stashed changes
 	input_graph_from_file(input_data, COUNT_VERTICES, input_count_edges, filename);
+
 	const int COUNT_EDGES = input_count_edges + 1;
 
 	vector<vector<int>> incidence_list(COUNT_EDGES);
 	make_incidence_list(incidence_list, input_data);
 
-	vector<vector<int>> adjacent_list(COUNT_VERTICES);
+	vector<vector<int>> adjacent_list(COUNT_VERTICES, vector<int>());
 	make_adjacent_list(incidence_list, adjacent_list);
 
 	//use bfs to make graph partition
 	int best = INT_MIN;
+<<<<<<< Updated upstream
 	for (int i = 0; i < 100; i++) {
 		srand(time(NULL));
 		int start_pos = rand() % COUNT_VERTICES;
+=======
+	for (int i = 0; i < 10; i++) {
+>>>>>>> Stashed changes
 		vector<bool> used(COUNT_VERTICES, false);
 		int maximum = 0;
 		vector<int> destination(COUNT_VERTICES, -1);
@@ -199,7 +248,8 @@ int main() {
 		//count vertices in each part
 		vector<int> count(maximum + 1, 0);
 		for (int i = 0; i < COUNT_VERTICES; i++) {
-			count[destination[i]]++;
+			if (destination[i] != -1)
+				count[destination[i]]++;
 		}
 
 		//allocate parts in type sets (zero set or one set)
@@ -235,12 +285,14 @@ int main() {
 
 		//split parts in id_sets in each type set
 		split_parts_into_id_subsets(parts_of_type_set_0, count, count_type_subset_0, parts_to_subset_0);
-		split_parts_into_id_subsets(parts_of_type_set_1, count, count_type_subset_1, parts_to_subset_1);;
+		split_parts_into_id_subsets(parts_of_type_set_1, count, count_type_subset_1, parts_to_subset_1);
 
 		//TYPE_ID_SET.first = 0 or 1 (time period (set), type_set)
 		//TYPE_ID_SET.second -> NO of subset (CORES subsets in each time period(type_set))
 		vector<pair<int, int>> TYPE_ID_SET(COUNT_VERTICES, { -1, -1 });
 		for (int i = 0; i < COUNT_VERTICES; i++) {
+			if (destination[i] == -1) continue;
+
 			int time_period;//type_set
 			int subset;//id_subset
 			int part = destination[i];
@@ -257,13 +309,12 @@ int main() {
 			TYPE_ID_SET[i].second = subset;//id_subset
 		}
 
-		assert(cnt0 + cnt1 == COUNT_VERTICES);
 		assert(count_type_subset_0[0] + count_type_subset_0[1] + count_type_subset_0[2] + count_type_subset_0[3] == cnt0);
 		assert(count_type_subset_1[0] + count_type_subset_1[1] + count_type_subset_1[2] + count_type_subset_1[3] == cnt1);
 
 		if ((count_type_subset_0[3] + count_type_subset_1[3]) / 2 > best) {
 			best = (count_type_subset_0[3] + count_type_subset_1[3]) / 2;
-			print_answer_to_file(TYPE_ID_SET, COUNT_VERTICES);
+			print_answer_to_file(TYPE_ID_SET, COUNT_VERTICES, adjacent_list);
 		}
 	}
 
